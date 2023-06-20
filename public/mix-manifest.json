@@ -1,0 +1,8 @@
+{
+    "/js/app.js": "/js/app.js",
+    "/tenant/js/app.js": "/tenant/js/app.js",
+    "/tenant/js/manifest.js": "/tenant/js/manifest.js",
+    "/tenant/css/app.css": "/tenant/css/app.css",
+    "/css/app.css": "/css/app.css",
+    "/tenant/js/vendor.js": "/tenant/js/vendor.js"
+}

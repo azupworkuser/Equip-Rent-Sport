@@ -1,0 +1,65 @@
+# Template PHP Build
+
+# This template allows you to validate your PHP application.
+# The workflow allows running tests and code linting on the default branch.
+
+image: lorisleiva/laravel-docker:latest
+
+options:
+  size: 2x
+definitions:
+  services:
+    docker:
+      memory: 3000
+
+pipelines:
+  default:
+    - step:
+        name: Build
+        services:
+          - redis
+          - mysql
+        runs-on:
+          - self.hosted
+        script:
+          - cp .env.pipeline .env
+          - composer install --ignore-platform-reqs
+          - php artisan key:generate
+          - php artisan migrate
+          - php artisan optimize:clear
+        caches:
+          - composer
+        artifacts:
+          - vendor/**
+          - .env
+    - parallel:
+        steps:
+          - step:
+              name: Test
+              runs-on:
+                - self.hosted
+              script:
+                - echo "memory_limit = 2048M" > $PHP_INI_DIR/conf.d/php-memory-limits.ini
+                - ./vendor/bin/phpunit
+              caches:
+                - composer
+          - step:
+              name: Lint
+              runs-on:
+                - self.hosted
+              script:
+                - ./vendor/bin/phpcs ./ --standard=phpcs.xml
+              caches:
+                - composer
+
+
+definitions:
+  services:
+    mysql:
+      image: mysql:5.7
+      variables:
+        MYSQL_DATABASE: "booking"
+        MYSQL_ROOT_PASSWORD: "booking"
+        MYSQL_ALLOW_EMPTY_PASSWORD: "1"
+    redis:
+      image: redis:alpine
